@@ -1,0 +1,20 @@
+# Compiled files
+cdb
+*.o
+*.out
+
+# Build directories
+build/
+
+# Vim temporary files
+*.swp
+*.swo
+
+# VS Code
+.vscode/
+
+# Database files
+data/*.db
+
+# OS files
+.DS_Store
