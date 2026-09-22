@@ -1,48 +1,11 @@
 #include <stdio.h>
-#include <string.h>
-
-#define MAX_INPUT_SIZE 256
+#include "table.h"
 
 int main(void)
 {
-    char input[MAX_INPUT_SIZE];
+    Table table = create_table("students");
 
-    printf("=================================\n");
-    printf("      CDB Database Engine\n");
-    printf("          Version 0.1\n");
-    printf("=================================\n");
-
-    while (1)
-    {
-        printf("CDB> ");
-
-        if (fgets(input, sizeof(input), stdin) == NULL)
-        {
-            break;
-        }
-
-        input[strcspn(input, "\n")] = '\0';
-
-        if (strcmp(input, "exit") == 0)
-        {
-            printf("Goodbye!\n");
-            break;
-        }
-        else if (strcmp(input, "help") == 0)
-        {
-            printf("\nAvailable commands:\n");
-            printf("  help\n");
-            printf("  exit\n\n");
-        }
-        else if (strlen(input) == 0)
-        {
-            continue;
-        }
-        else
-        {
-            printf("Unknown command: %s\n", input);
-        }
-    }
+    printf("Table name: %s\n", table.name);
 
     return 0;
 }
