@@ -71,3 +71,16 @@ void print_table(const Table *table)
         }
     }
 }
+
+int add_record(Table *table, const Record *record)
+{
+    if (table->record_count >= MAX_RECORDS)
+    {
+        return 0;
+    }
+
+    table->records[table->record_count] = *record;
+    table->record_count++;
+
+    return 1;
+}

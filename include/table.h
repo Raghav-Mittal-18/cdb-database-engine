@@ -1,9 +1,11 @@
 #ifndef TABLE_H
 #define TABLE_H
+#include "record.h"
 
 #define MAX_TABLE_NAME_LENGTH 64
 #define MAX_COLUMNS 32
 #define MAX_COLUMN_NAME_LENGTH 64
+#define MAX_RECORDS 1000
 
 typedef enum
 {
@@ -23,6 +25,8 @@ typedef struct
 
     Column columns[MAX_COLUMNS];
 
+    Record records[MAX_RECORDS];
+
     int column_count;
     int record_count;
 } Table;
@@ -31,5 +35,5 @@ Table create_table(const char *name);
 int add_column(Table *table, const char *column_name, DataType type);
 const char *data_type_to_string(DataType type);
 void print_table(const Table *table);
-
+int add_record(Table *table, const Record *record);
 #endif

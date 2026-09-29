@@ -14,5 +14,6 @@ typedef struct
 void init_database(Database *database);
 int add_table(Database *database, const char *table_name);
 void print_database(const Database *database);
+Table *get_table(Database *database, const char *table_name);
 
 #endif

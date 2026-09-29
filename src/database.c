@@ -1,5 +1,6 @@
 #include "database.h"
 #include <stdio.h>
+#include <string.h>
 
 void init_database(Database *database)
 {
@@ -19,6 +20,19 @@ int add_table(Database *database, const char *table_name)
     return 1;
 }
 
+Table *get_table(Database *database, const char *table_name)
+{
+    for (int i = 0; i < database->table_count; i++)
+    {
+        if (strcmp(database->tables[i].name, table_name) == 0)
+        {
+            return &database->tables[i];
+        }
+    }
+
+    return NULL;
+}
+
 void print_database(const Database *database)
 {
     printf("Database contains %d table(s):\n",
@@ -29,5 +43,6 @@ void print_database(const Database *database)
         printf("%d. %s\n",
                i + 1,
                database->tables[i].name);
+	print_table(&database->tables[i]);
     }
 }

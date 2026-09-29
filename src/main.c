@@ -11,6 +11,7 @@ int main(void)
 {
     char input[MAX_INPUT_SIZE];
     char table_name[MAX_TABLE_NAME_LENGTH];
+    char column_definitions[256];
 
     Database database;
 
@@ -50,16 +51,35 @@ int main(void)
             print_database(&database);
         }
         else if (parse_create_table(input, table_name))
-        {
-            if (add_table(&database, table_name))
-            {
-                printf("Table created successfully.\n");
-            }
-            else
-            {
-                printf("Failed to create table.\n");
-            }
-        }
+	{
+    		if (!extract_column_definitions(input, column_definitions))
+    		{
+        	printf("Invalid column definitions.\n");
+        	continue;
+   		 }
+
+    		if (!add_table(&database, table_name))
+    		{
+        		printf("Failed to create table.\n");
+        		continue;
+   	 }
+
+    Table *table = get_table(&database, table_name);
+
+    if (table == NULL)
+    {
+        printf("Failed to access created table.\n");
+        continue;
+    }
+
+    if (!parse_column_definitions(column_definitions, table))
+    {
+        printf("Invalid column definition.\n");
+        continue;
+    }
+
+    printf("Table created successfully.\n");
+}
         else if (strlen(input) == 0)
         {
             continue;
