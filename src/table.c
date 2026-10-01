@@ -84,3 +84,44 @@ int add_record(Table *table, const Record *record)
 
     return 1;
 }
+
+void print_records(const Table *table)
+{
+    if (table->record_count == 0)
+    {
+        printf("No records found.\n");
+        return;
+    }
+
+    printf("\nRecords:\n");
+
+    for (int i = 0; i < table->record_count; i++)
+    {
+        printf("Record %d: ", i + 1);
+
+        for (int j = 0; j < table->column_count; j++)
+        {
+            if (table->columns[j].type == TYPE_INT)
+            {
+                printf("%d",
+                       table->records[i]
+                           .values[j]
+                           .int_value);
+            }
+            else if (table->columns[j].type == TYPE_TEXT)
+            {
+                printf("%s",
+                       table->records[i]
+                           .values[j]
+                           .text_value);
+            }
+
+            if (j < table->column_count - 1)
+            {
+                printf(" | ");
+            }
+        }
+
+        printf("\n");
+    }
+}
