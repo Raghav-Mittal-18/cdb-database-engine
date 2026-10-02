@@ -514,3 +514,252 @@ int parse_select(
 
     return 1;
 }
+
+int parse_update(
+    const char *input,
+    char *table_name,
+    char *set_column,
+    char *set_value,
+    char *condition_column,
+    char *condition_value
+)
+{
+    const char *prefix = "UPDATE ";
+    const char *set_keyword = " SET ";
+    const char *where_keyword = " WHERE ";
+
+    const char *set_position;
+    const char *where_position;
+
+    size_t prefix_length;
+    size_t table_name_length;
+    size_t set_column_length;
+    size_t set_value_length;
+    size_t condition_column_length;
+    size_t condition_value_length;
+
+    prefix_length = strlen(prefix);
+
+    if (strncmp(input, prefix, prefix_length) != 0)
+    {
+        return 0;
+    }
+
+    /*
+     * Find SET.
+     *
+     * UPDATE students SET age = 22 WHERE id = 1
+     */
+    set_position = strstr(
+        input + prefix_length,
+        set_keyword
+    );
+
+    if (set_position == NULL)
+    {
+        return 0;
+    }
+
+    /*
+     * Extract table name.
+     */
+    table_name_length =
+        (size_t)(set_position -
+                 (input + prefix_length));
+
+    if (table_name_length == 0 ||
+        table_name_length >= MAX_TABLE_NAME_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        table_name,
+        input + prefix_length,
+        table_name_length
+    );
+
+    table_name[table_name_length] = '\0';
+
+    trim_whitespace(table_name);
+
+    /*
+     * Find WHERE.
+     */
+    where_position = strstr(
+        set_position + strlen(set_keyword),
+        where_keyword
+    );
+
+    if (where_position == NULL)
+    {
+        return 0;
+    }
+
+    /*
+     * Extract SET part:
+     *
+     * age = 22
+     */
+    const char *set_expression =
+        set_position + strlen(set_keyword);
+
+    const char *set_equals =
+        strchr(set_expression, '=');
+
+    if (set_equals == NULL ||
+        set_equals >= where_position)
+    {
+        return 0;
+    }
+
+    /*
+     * Extract SET column.
+     */
+    set_column_length =
+        (size_t)(set_equals - set_expression);
+
+    if (set_column_length == 0 ||
+        set_column_length >= MAX_COLUMN_NAME_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        set_column,
+        set_expression,
+        set_column_length
+    );
+
+    set_column[set_column_length] = '\0';
+
+    trim_whitespace(set_column);
+
+    /*
+     * Extract SET value.
+     */
+    const char *set_value_start =
+        set_equals + 1;
+
+    set_value_length =
+        (size_t)(where_position - set_value_start);
+
+    if (set_value_length == 0 ||
+        set_value_length >= MAX_TEXT_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        set_value,
+        set_value_start,
+        set_value_length
+    );
+
+    set_value[set_value_length] = '\0';
+
+    trim_whitespace(set_value);
+
+    /*
+     * Remove surrounding quotes from TEXT values.
+     */
+    size_t actual_set_value_length =
+        strlen(set_value);
+
+    if (actual_set_value_length >= 2 &&
+        set_value[0] == '"' &&
+        set_value[actual_set_value_length - 1] == '"')
+    {
+        memmove(
+            set_value,
+            set_value + 1,
+            actual_set_value_length - 2
+        );
+
+        set_value[actual_set_value_length - 2] = '\0';
+    }
+
+    /*
+     * Extract WHERE condition:
+     *
+     * id = 1
+     */
+    const char *condition =
+        where_position + strlen(where_keyword);
+
+    const char *condition_equals =
+        strchr(condition, '=');
+
+    if (condition_equals == NULL)
+    {
+        return 0;
+    }
+
+    /*
+     * Extract condition column.
+     */
+    condition_column_length =
+        (size_t)(condition_equals - condition);
+
+    if (condition_column_length == 0 ||
+        condition_column_length >= MAX_COLUMN_NAME_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        condition_column,
+        condition,
+        condition_column_length
+    );
+
+    condition_column[condition_column_length] = '\0';
+
+    trim_whitespace(condition_column);
+
+    /*
+     * Extract condition value.
+     */
+    const char *condition_value_start =
+        condition_equals + 1;
+
+    condition_value_length =
+        strlen(condition_value_start);
+
+    if (condition_value_length == 0 ||
+        condition_value_length >= MAX_TEXT_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        condition_value,
+        condition_value_start,
+        condition_value_length
+    );
+
+    condition_value[condition_value_length] = '\0';
+
+    trim_whitespace(condition_value);
+
+    /*
+     * Remove surrounding quotes from TEXT values.
+     */
+    size_t actual_condition_value_length =
+        strlen(condition_value);
+
+    if (actual_condition_value_length >= 2 &&
+        condition_value[0] == '"' &&
+        condition_value[actual_condition_value_length - 1] == '"')
+    {
+        memmove(
+            condition_value,
+            condition_value + 1,
+            actual_condition_value_length - 2
+        );
+
+        condition_value[actual_condition_value_length - 2] = '\0';
+    }
+
+    return 1;
+}

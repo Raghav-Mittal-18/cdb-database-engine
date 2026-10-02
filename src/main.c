@@ -11,13 +11,18 @@
 int main(void)
 {
     char input[MAX_INPUT_SIZE];
+
     char table_name[MAX_TABLE_NAME_LENGTH];
     char column_definitions[256];
     char values[256];
+
     char condition_column[MAX_COLUMN_NAME_LENGTH];
     char condition_value[MAX_TEXT_LENGTH];
-    
-    static  Database database;
+
+    char set_column[MAX_COLUMN_NAME_LENGTH];
+    char set_value[MAX_TEXT_LENGTH];
+
+    static Database database;
 
     init_database(&database);
 
@@ -37,11 +42,18 @@ int main(void)
 
         input[strcspn(input, "\n")] = '\0';
 
+        /*
+         * EXIT
+         */
         if (strcmp(input, "exit") == 0)
         {
             printf("Goodbye!\n");
             break;
         }
+
+        /*
+         * HELP
+         */
         else if (strcmp(input, "help") == 0)
         {
             printf("\nAvailable commands:\n");
@@ -49,33 +61,37 @@ int main(void)
             printf("  tables\n");
             printf("  CREATE TABLE <name> (...)\n");
             printf("  INSERT INTO <table> VALUES (...)\n");
+            printf("  SELECT * FROM <table>\n");
+            printf("  SELECT * FROM <table> WHERE <column> = <value>\n");
+            printf("  UPDATE <table> SET <column> = <value> WHERE <column> = <value>\n");
             printf("  exit\n\n");
         }
+
+        /*
+         * LIST TABLES
+         */
         else if (strcmp(input, "tables") == 0)
         {
             printf("\n");
+
             print_database(&database);
-	    for (int i = 0; i < database.table_count; i++)
-	    {
-		    print_records(&database.tables[i]);
-	    }
+
+            for (int i = 0;
+                 i < database.table_count;
+                 i++)
+            {
+                print_records(&database.tables[i]);
+            }
         }
-	else if (parse_select(
-             input,
-             table_name,
-             condition_column,
-             condition_value))
-{
-    execute_select(
-        &database,
-        table_name,
-        condition_column,
-        condition_value
-    );
-}
+
+        /*
+         * CREATE TABLE
+         */
         else if (parse_create_table(input, table_name))
         {
-            if (!extract_column_definitions(input, column_definitions))
+            if (!extract_column_definitions(
+                    input,
+                    column_definitions))
             {
                 printf("Invalid column definitions.\n");
                 continue;
@@ -87,7 +103,8 @@ int main(void)
                 continue;
             }
 
-            Table *table = get_table(&database, table_name);
+            Table *table =
+                get_table(&database, table_name);
 
             if (table == NULL)
             {
@@ -105,14 +122,25 @@ int main(void)
 
             printf("Table created successfully.\n");
         }
-        else if (parse_insert(input, table_name, values))
+
+        /*
+         * INSERT
+         */
+        else if (parse_insert(
+                     input,
+                     table_name,
+                     values))
         {
-            Table *table = get_table(&database, table_name);
+            Table *table =
+                get_table(&database, table_name);
 
             if (table == NULL)
             {
-                printf("Table '%s' does not exist.\n",
-                       table_name);
+                printf(
+                    "Table '%s' does not exist.\n",
+                    table_name
+                );
+
                 continue;
             }
 
@@ -120,13 +148,18 @@ int main(void)
 
             init_record(&record);
 
-            if (!parse_values(values, table, &record))
+            if (!parse_values(
+                    values,
+                    table,
+                    &record))
             {
                 printf("Invalid values.\n");
                 continue;
             }
 
-            if (!add_record(table, &record))
+            if (!add_record(
+                    table,
+                    &record))
             {
                 printf("Failed to insert record.\n");
                 continue;
@@ -134,13 +167,62 @@ int main(void)
 
             printf("Record inserted successfully.\n");
         }
+
+        /*
+         * SELECT
+         */
+        else if (parse_select(
+                     input,
+                     table_name,
+                     condition_column,
+                     condition_value))
+        {
+            execute_select(
+                &database,
+                table_name,
+                condition_column,
+                condition_value
+            );
+        }
+
+        /*
+         * UPDATE
+         */
+        else if (parse_update(
+                     input,
+                     table_name,
+                     set_column,
+                     set_value,
+                     condition_column,
+                     condition_value))
+        {
+            execute_update(
+                &database,
+                table_name,
+                set_column,
+                set_value,
+                condition_column,
+                condition_value
+            );
+        }
+
+        /*
+         * EMPTY INPUT
+         */
         else if (strlen(input) == 0)
         {
             continue;
         }
+
+        /*
+         * UNKNOWN COMMAND
+         */
         else
         {
-            printf("Unknown command: %s\n", input);
+            printf(
+                "Unknown command: %s\n",
+                input
+            );
         }
     }
 

@@ -37,4 +37,13 @@ int parse_select(
     char *condition_value
 );
 
+int parse_update(
+    const char *input,
+    char *table_name,
+    char *set_column,
+    char *set_value,
+    char *condition_column,
+    char *condition_value
+);
+
 #endif

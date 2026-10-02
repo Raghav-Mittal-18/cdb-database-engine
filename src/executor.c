@@ -144,3 +144,128 @@ if (!found)
     printf("No matching records found.\n");
 }
 }
+
+void execute_update(
+    Database *database,
+    const char *table_name,
+    const char *set_column,
+    const char *set_value,
+    const char *condition_column,
+    const char *condition_value
+)
+{
+    Table *table = get_table(database, table_name);
+
+    if (table == NULL)
+    {
+        printf("Table '%s' does not exist.\n",
+               table_name);
+        return;
+    }
+
+    int set_column_index =
+        find_column_index(table, set_column);
+
+    if (set_column_index == -1)
+    {
+        printf("Column '%s' does not exist.\n",
+               set_column);
+        return;
+    }
+
+    int condition_column_index =
+        find_column_index(table, condition_column);
+
+    if (condition_column_index == -1)
+    {
+        printf("Column '%s' does not exist.\n",
+               condition_column);
+        return;
+    }
+
+    
+    /*
+     * Actual record update will be added here.
+     */
+    int updated = 0;
+
+for (int i = 0; i < table->record_count; i++)
+{
+    int matches = 0;
+
+    if (table->columns[condition_column_index].type == TYPE_INT)
+    {
+        int condition_number;
+
+        if (sscanf(condition_value, "%d",
+                   &condition_number) != 1)
+        {
+            printf("Invalid integer value: %s\n",
+                   condition_value);
+            return;
+        }
+
+        if (table->records[i]
+                .values[condition_column_index]
+                .int_value == condition_number)
+        {
+            matches = 1;
+        }
+    }
+    else if (table->columns[condition_column_index].type == TYPE_TEXT)
+    {
+        if (strcmp(
+                table->records[i]
+                    .values[condition_column_index]
+                    .text_value,
+                condition_value) == 0)
+        {
+            matches = 1;
+        }
+    }
+
+    if (matches)
+    {
+        if (table->columns[set_column_index].type == TYPE_INT)
+        {
+            int new_value;
+
+            if (sscanf(set_value, "%d", &new_value) != 1)
+            {
+                printf("Invalid integer value: %s\n",
+                       set_value);
+                return;
+            }
+
+            table->records[i]
+                .values[set_column_index]
+                .int_value = new_value;
+        }
+        else if (table->columns[set_column_index].type == TYPE_TEXT)
+        {
+            strncpy(
+                table->records[i]
+                    .values[set_column_index]
+                    .text_value,
+                set_value,
+                MAX_TEXT_LENGTH - 1
+            );
+
+            table->records[i]
+                .values[set_column_index]
+                .text_value[MAX_TEXT_LENGTH - 1] = '\0';
+        }
+
+        updated = 1;
+    }
+}
+
+if (updated)
+{
+    printf("Record updated successfully.\n");
+}
+else
+{
+    printf("No matching records found.\n");
+}
+}
