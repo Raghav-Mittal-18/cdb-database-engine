@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "database.h"
 #include "executor.h"
+#include "storage.h"
 
 #define MAX_INPUT_SIZE 256
 
@@ -24,8 +25,10 @@ int main(void)
 
     static Database database;
 
+if (!load_database(&database))
+{
     init_database(&database);
-
+}
     printf("=================================\n");
     printf("      CDB Database Engine\n");
     printf("          Version 0.1\n");
@@ -46,10 +49,19 @@ int main(void)
          * EXIT
          */
         if (strcmp(input, "exit") == 0)
-        {
-            printf("Goodbye!\n");
-            break;
-        }
+{
+    if (save_database(&database))
+    {
+        printf("Database saved successfully.\n");
+    }
+    else
+    {
+        printf("Failed to save database.\n");
+    }
+
+    printf("Goodbye!\n");
+    break;
+}
 
         /*
          * HELP
