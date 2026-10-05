@@ -268,4 +268,108 @@ else
 {
     printf("No matching records found.\n");
 }
+
+}
+
+void execute_delete(
+    Database *database,
+    const char *table_name,
+    const char *condition_column,
+    const char *condition_value
+)
+{
+    Table *table =
+        get_table(database, table_name);
+
+    if (table == NULL)
+    {
+        printf(
+            "Table '%s' does not exist.\n",
+            table_name
+        );
+
+        return;
+    }
+
+    int condition_index =
+        find_column_index(
+            table,
+            condition_column
+        );
+
+    if (condition_index == -1)
+    {
+        printf(
+            "Column '%s' does not exist.\n",
+            condition_column
+        );
+
+        return;
+    }
+
+    int deleted = 0;
+
+    for (int i = 0;
+         i < table->record_count;
+         i++)
+    {
+        int match = 0;
+
+        if (table->columns[condition_index].type == TYPE_INT)
+        {
+            int value;
+
+            if (sscanf(
+                    condition_value,
+                    "%d",
+                    &value) != 1)
+            {
+                printf("Invalid integer value.\n");
+                return;
+            }
+
+            if (table->records[i]
+                    .values[condition_index]
+                    .int_value == value)
+            {
+                match = 1;
+            }
+        }
+        else if (
+            table->columns[condition_index].type == TYPE_TEXT)
+        {
+            if (strcmp(
+                    table->records[i]
+                        .values[condition_index]
+                        .text_value,
+                    condition_value) == 0)
+            {
+                match = 1;
+            }
+        }
+
+        if (match)
+        {
+            for (int j = i;
+                 j < table->record_count - 1;
+                 j++)
+            {
+                table->records[j] =
+                    table->records[j + 1];
+            }
+
+            table->record_count--;
+            deleted = 1;
+            i--;
+        }
+    }
+
+    if (deleted)
+    {
+        printf("Record deleted successfully.\n");
+    }
+    else
+    {
+        printf("No matching records found.\n");
+    }
 }

@@ -19,4 +19,11 @@ void execute_update(
     const char *condition_value
 );
 
+void execute_delete(
+    Database *database,
+    const char *table_name,
+    const char *condition_column,
+    const char *condition_value
+);
+
 #endif

@@ -763,3 +763,81 @@ int parse_update(
 
     return 1;
 }
+
+int parse_delete(
+    const char *input,
+    char *table_name,
+    char *condition_column,
+    char *condition_value
+)
+{
+    const char *prefix = "DELETE FROM ";
+
+    if (strncmp(input, prefix, strlen(prefix)) != 0)
+    {
+        return 0;
+    }
+
+    const char *where =
+        strstr(input, " WHERE ");
+
+    if (where == NULL)
+    {
+        return 0;
+    }
+
+    size_t table_length =
+        where - (input + strlen(prefix));
+
+    if (table_length == 0 ||
+        table_length >= MAX_TABLE_NAME_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        table_name,
+        input + strlen(prefix),
+        table_length
+    );
+
+    table_name[table_length] = '\0';
+
+    const char *condition =
+        where + strlen(" WHERE ");
+
+    const char *equals =
+        strchr(condition, '=');
+
+    if (equals == NULL)
+    {
+        return 0;
+    }
+
+    size_t column_length =
+        equals - condition;
+
+    if (column_length == 0 ||
+        column_length >= MAX_COLUMN_NAME_LENGTH)
+    {
+        return 0;
+    }
+
+    strncpy(
+        condition_column,
+        condition,
+        column_length
+    );
+
+    condition_column[column_length] = '\0';
+
+trim_whitespace(condition_column);
+
+strcpy(
+    condition_value,
+    equals + 1
+);
+
+trim_whitespace(condition_value);
+    return 1;
+}

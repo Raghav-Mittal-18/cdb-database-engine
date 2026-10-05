@@ -46,4 +46,10 @@ int parse_update(
     char *condition_value
 );
 
+int parse_delete(
+    const char *input,
+    char *table_name,
+    char *condition_column,
+    char *condition_value
+);
 #endif

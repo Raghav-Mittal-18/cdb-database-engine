@@ -23,6 +23,9 @@ int main(void)
     char set_column[MAX_COLUMN_NAME_LENGTH];
     char set_value[MAX_TEXT_LENGTH];
 
+    char delete_condition_column[MAX_COLUMN_NAME_LENGTH];
+    char delete_condition_value[MAX_TEXT_LENGTH];
+
     static Database database;
 
 if (!load_database(&database))
@@ -76,7 +79,8 @@ if (!load_database(&database))
             printf("  SELECT * FROM <table>\n");
             printf("  SELECT * FROM <table> WHERE <column> = <value>\n");
             printf("  UPDATE <table> SET <column> = <value> WHERE <column> = <value>\n");
-            printf("  exit\n\n");
+            printf("  DELETE FROM <table> WHERE <column> = <value>\n");
+	    printf("  exit\n\n");
         }
 
         /*
@@ -217,6 +221,23 @@ if (!load_database(&database))
                 condition_value
             );
         }
+
+/*
+ * DELETE
+ */
+else if (parse_delete(
+             input,
+             table_name,
+             delete_condition_column,
+             delete_condition_value))
+{
+    execute_delete(
+        &database,
+        table_name,
+        delete_condition_column,
+        delete_condition_value
+    );
+}
 
         /*
          * EMPTY INPUT
