@@ -14,7 +14,7 @@ build/
 .vscode/
 
 # Database files
-data/*.db
+data/*
 
 # OS files
 .DS_Store
