@@ -14,7 +14,21 @@ int add_table(Database *database, const char *table_name)
         return 0;
     }
 
-    database->tables[database->table_count] = create_table(table_name);
+    for (int i = 0;
+         i < database->table_count;
+         i++)
+    {
+        if (strcmp(
+                database->tables[i].name,
+                table_name) == 0)
+        {
+            return 0;
+        }
+    }
+
+    database->tables[database->table_count] =
+        create_table(table_name);
+
     database->table_count++;
 
     return 1;
