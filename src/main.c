@@ -113,14 +113,23 @@ if (!load_database(&database))
                 continue;
             }
 
+            Table new_table = create_table(table_name);
+
+            if (!parse_column_definitions(
+                    column_definitions,
+                    &new_table))
+            {
+                printf("Invalid column definition.\n");
+                continue;
+            }
+
             if (!add_table(&database, table_name))
             {
                 printf("Failed to create table.\n");
                 continue;
             }
 
-            Table *table =
-                get_table(&database, table_name);
+            Table *table = get_table(&database, table_name);
 
             if (table == NULL)
             {
@@ -128,13 +137,7 @@ if (!load_database(&database))
                 continue;
             }
 
-            if (!parse_column_definitions(
-                    column_definitions,
-                    table))
-            {
-                printf("Invalid column definition.\n");
-                continue;
-            }
+            *table = new_table;
 
             printf("Table created successfully.\n");
         }

@@ -4,7 +4,7 @@
 
 Table create_table(const char *name)
 {
-    Table table;
+	Table table = {0};
 
     strncpy(table.name, name, MAX_TABLE_NAME_LENGTH - 1);
     table.name[MAX_TABLE_NAME_LENGTH - 1] = '\0';
