@@ -11,6 +11,7 @@ cleanup() {
 trap cleanup EXIT
 
 cp -r "$PROJECT_DIR/src" "$PROJECT_DIR/include" "$PROJECT_DIR/Makefile" "$TEST_DIR/"
+cp -r "$PROJECT_DIR/tests" "$TEST_DIR/"
 mkdir -p "$TEST_DIR/data"
 
 cd "$TEST_DIR"
@@ -54,4 +55,13 @@ check "Record 1: 1 | Raghav | 22" "UPDATE result"
 check "Record 2: 2 | Aman | 19" "INSERT result"
 
 echo ""
+echo ""
+echo "Running DELETE parser edge-case tests..."
+
+gcc -Wall -Wextra -std=c11 -Iinclude \
+    tests/test_parse_delete.c src/parser.c src/table.c \
+    -o /tmp/test_parse_delete
+
+/tmp/test_parse_delete
+rm -f /tmp/test_parse_delete
 echo "All CRUD tests passed."

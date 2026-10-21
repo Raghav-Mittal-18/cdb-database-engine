@@ -833,11 +833,28 @@ int parse_delete(
 
 trim_whitespace(condition_column);
 
-strcpy(
+size_t condition_value_length = strlen(equals + 1);
+
+if (condition_value_length == 0 ||
+    condition_value_length >= MAX_TEXT_LENGTH)
+{
+    return 0;
+}
+
+strncpy(
     condition_value,
-    equals + 1
+    equals + 1,
+    condition_value_length
 );
 
+condition_value[condition_value_length] = '\0';
+
 trim_whitespace(condition_value);
-    return 1;
+
+if (condition_value[0] == '\0')
+{
+    return 0;
+}
+
+return 1;
 }
