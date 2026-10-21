@@ -1,8 +1,26 @@
 #!/bin/bash
 
+set -e
+
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+TEST_DIR="$(mktemp -d)"
+
+cleanup() {
+    rm -rf "$TEST_DIR"
+}
+trap cleanup EXIT
+
+cp -r "$PROJECT_DIR/src" "$PROJECT_DIR/include" "$PROJECT_DIR/Makefile" "$TEST_DIR/"
+mkdir -p "$TEST_DIR/data"
+
+cd "$TEST_DIR"
+
 echo "=============================="
 echo " CDB CRUD TEST"
 echo "=============================="
+
+make clean
+make
 
 OUTPUT=$(printf '%s\n' \
 "CREATE TABLE test_students (id INT, name TEXT, age INT)" \
@@ -13,46 +31,27 @@ OUTPUT=$(printf '%s\n' \
 "SELECT * FROM test_students" \
 "DELETE FROM test_students WHERE id = 2" \
 "SELECT * FROM test_students" \
-"exit" \
-| ./cdb)
+"exit" | ./cdb)
 
 echo "$OUTPUT"
-
 echo ""
 echo "Checking results..."
 
-if echo "$OUTPUT" | grep -q "Table created successfully."; then
-    echo "PASS: CREATE"
-else
-    echo "FAIL: CREATE"
-fi
+check() {
+    if echo "$OUTPUT" | grep -Fq "$1"; then
+        echo "PASS: $2"
+    else
+        echo "FAIL: $2"
+        exit 1
+    fi
+}
 
-if echo "$OUTPUT" | grep -q "Record inserted successfully."; then
-    echo "PASS: INSERT"
-else
-    echo "FAIL: INSERT"
-fi
-
-if echo "$OUTPUT" | grep -q "Record updated successfully."; then
-    echo "PASS: UPDATE"
-else
-    echo "FAIL: UPDATE"
-fi
-
-if echo "$OUTPUT" | grep -q "Record deleted successfully."; then
-    echo "PASS: DELETE"
-else
-    echo "FAIL: DELETE"
-fi
-
+check "Table created successfully." "CREATE"
+check "Record inserted successfully." "INSERT"
+check "Record updated successfully." "UPDATE"
+check "Record deleted successfully." "DELETE"
+check "Record 1: 1 | Raghav | 22" "UPDATE result"
+check "Record 2: 2 | Aman | 19" "INSERT result"
 
 echo ""
-echo "Checking final database state..."
-
-FINAL_RECORD_COUNT=$(echo "$OUTPUT" | grep -c "Record 1: 1 | Raghav | 22")
-
-if [ "$FINAL_RECORD_COUNT" -ge 1 ]; then
-    echo "PASS: Raghav record exists"
-else
-    echo "FAIL: Raghav record missing"
-fi
+echo "All CRUD tests passed."
